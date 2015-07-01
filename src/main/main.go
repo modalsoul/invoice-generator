@@ -9,6 +9,8 @@ import (
 	"log"
 )
 
+const amazon = "http://www.amazon.co.jp"
+
 type Item struct {
 	ID string
 	JpName string
@@ -26,6 +28,19 @@ func NewItem(id, jpName string) *Item {
 		JpName: jpName,
 	}
 	return item
+}
+
+func GetPaginationUrls(url string)[]string {
+	var paginationUrl []string
+	doc, _ := goquery.NewDocument(url)
+	doc.Find(".a-pagination").Each(func(_ int, s *goquery.Selection) {
+		s.Find("li[data-action='pag-trigger']").Each(func(_ int, s *goquery.Selection){
+			anker := s.Find("a")
+			href, _ := anker.Attr("href")
+			paginationUrl = append(paginationUrl, amazon + string(href))
+		})
+	})
+	return paginationUrl
 }
 
 func GetItems(url string)[]Item {
@@ -71,12 +86,16 @@ func TranslateItem(item Item)Item {
 func main() {
 	var wishlist = flag.String("wishlist", "", "target wishlist id")
 	flag.Parse()
-	url := "http://www.amazon.co.jp/gp/registry/wishlist/" + *wishlist + "/"
-	for _, item := range GetItems(url) {
-		json, err := json.Marshal(TranslateItem(item))
-		if err != nil {
-			log.Fatal(err)
+	wishlistUrl := amazon + "/gp/registry/wishlist/" + *wishlist + "/"
+	var items []Item
+	for _, p := range GetPaginationUrls(wishlistUrl) {
+		for _, item := range GetItems(p) {
+			items = append(items, TranslateItem(item))
 		}
-		fmt.Println(string(json))
 	}
+	json, err := json.Marshal(items)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(json))
 }

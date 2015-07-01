@@ -16,7 +16,7 @@ For example,
 Output: 
 
 ```json
-...
-{"ID":"4797374144","JpName":"数学ガールの秘密ノート/式とグラフ","EnName":"Sugaku Girl No Himitsu No Note / Shiki To Graph"}
-...
+[
+    {"ID":"4797374144","JpName":"数学ガールの秘密ノート/式とグラフ","EnName":"Sugaku Girl No Himitsu No Note / Shiki To Graph"},   
+]
 ```
